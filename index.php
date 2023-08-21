@@ -103,8 +103,32 @@ class DynamicProgrammingApproach extends KnapsackSolver
     public function solve(): array
     {
         $items = $this->items;
-        $bag = $this->knapsacks[0];
+        $bags = $this->knapsacks;
 
+        foreach ($bags as $i => $bag) {
+            $bag = $this->fillBag($bag, $items);
+            $bags[$i] = $bag;
+        }
+
+        return $bags;
+    }
+
+    private function fillBag(array $bag, array &$items): array
+    {
+        $matrix = $this->getMatrix($bag, $items);
+
+        $this->checkItem($bag, count($items), $bag['capacity'], $items, $matrix);
+    
+        $bag['total_capacity'] = $bag['current_capacity'];
+        $bag['total_value'] = $matrix[count($items)][$bag['capacity']];
+
+        $this->RemoveItemsFromList($bag['items'], $items);
+
+        return $bag;
+    }
+
+    private function getMatrix(array $bag, array $items): array
+    {
         $matrix = [];
         for ($i = 0; $i < count($items)+1; $i++) {
             $matrix[$i] = array_fill(0, $bag['capacity']+1, 0);
@@ -122,12 +146,7 @@ class DynamicProgrammingApproach extends KnapsackSolver
             }
         }
 
-        $this->checkItem($bag, count($items), $bag['capacity'], $items, $matrix);
-    
-        $bag['total_capacity'] = $bag['current_capacity'];
-        $bag['total_value'] = $matrix[count($items)][$bag['capacity']];
-
-        return $bag;
+        return $matrix;
     }
 
     private function checkItem(array &$bag, int $itemLen, int $capacity, array $items, array $matrix)
@@ -143,6 +162,24 @@ class DynamicProgrammingApproach extends KnapsackSolver
         } else {
             $this->checkItem($bag, $itemLen-1, $capacity, $items, $matrix);
         }
+    }
+
+    private function RemoveItemsFromList(array $bagItems, array &$items)
+    {
+        $filteredItems = [];
+        $itemsWithKey = [];
+
+        foreach ($bagItems as $bagItem) {
+            $itemsWithKey[$bagItem['name']] = $bagItem;
+        }
+
+        foreach ($items as $item) {
+            if (!array_key_exists($item['name'], $itemsWithKey)) {
+                $filteredItems[] = $item;
+            }
+        }
+
+        $items = $filteredItems;
     }
 }
 
@@ -160,9 +197,9 @@ $knapsacks = [
 ];
 
 // Create the solver instance
-$solverWithGreedy = new GreedyApproach($items, $knapsacks);
+// $solverWithGreedy = new GreedyApproach($items, $knapsacks);
 $solverDynamicProgramming = new DynamicProgrammingApproach($items, $knapsacks);
 
 // Print the solution
-print_r($solverWithGreedy->solve());
+// print_r($solverWithGreedy->solve());
 print_r($solverDynamicProgramming->solve());

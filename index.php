@@ -197,9 +197,9 @@ $knapsacks = [
 ];
 
 // Create the solver instance
-// $solverWithGreedy = new GreedyApproach($items, $knapsacks);
+$solverWithGreedy = new GreedyApproach($items, $knapsacks);
 $solverDynamicProgramming = new DynamicProgrammingApproach($items, $knapsacks);
 
 // Print the solution
-// print_r($solverWithGreedy->solve());
+print_r($solverWithGreedy->solve());
 print_r($solverDynamicProgramming->solve());
